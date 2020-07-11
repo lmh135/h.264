@@ -1,0 +1,45 @@
+采集-.264硬件压缩-传输-解压缩
+ffmpeg:
+https://blog.csdn.net/s290484188/article/details/80811468
+https://jingyan.baidu.com/article/c74d60007b87510f6a595dfc.html
+
+sudo apt install yasm
+
+raspivid -o mykeychain.h264 -t 10000 -w 1280 -h 720  
+raspistill -o image.jpg
+
+ls -al /dev/ | grep video
+
+sudo vim /etc/modules
+i2c-dev
+bcm2835-v4l2
+
+socat:
+./configure
+make
+make install
+sudo apt-get install socat
+
+sudo ffmpeg -f v4l2 -r 15 -video_size vga -pix_fmt yuv420p -i /dev/video0 -b:v 500k -c:v h264_omx -an -f flv 4.h264
+
+sudo apt-get install socat
+
+连接wifi:sudo nano /etc/network/interfaces
+#allow-hotplug wlan0
+#iface wlan0 inet static
+#wpa-ssid Long-315_2.4G
+#wpa-psk longmen317
+#address 192.168.1.113
+#netmask 255.255.255.0
+#gateway 192.168.1.1
+#network 192.168.1.1
+#iface default inet dhcp
+
+sudo nano /etc/dhcpcd.conf
+
+raspivid -t 999999 -hf -o -| socat - udp-datagram:192.168.1.14:8080
+vlc udp://@:8080 –demux=h264
+
+sudo ffmpeg -f v4l2 -r 25 -video_size vga -pix_fmt yuv420p -i /dev/video0 -b:v 500k -c:v h264_omx -an -f flv -| socat - udp-datagram:192.168.1.14:8080
+vlc udp://@:8080 –demux=h264 –udp-caching=500 
+
